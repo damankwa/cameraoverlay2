@@ -1,22 +1,27 @@
 package eng.devdevelop.com.cameraapp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.Toast;
+import android.view.LayoutInflater;
+import android.view.ViewGroup.LayoutParams;
 
 import java.io.IOException;
 
 /**
- * Created by David on 12/30/2015.
+ * Created by David Amankwa on 12/30/2015.
  */
 
 public class CameraPreview extends SurfaceView implements
         SurfaceHolder.Callback {
     private SurfaceHolder mSurfaceHolder;
     private Camera mCamera;
+
 
     // Constructor that obtains context and camera
     @SuppressWarnings("deprecation")
@@ -26,6 +31,7 @@ public class CameraPreview extends SurfaceView implements
         this.mSurfaceHolder = this.getHolder();
         this.mSurfaceHolder.addCallback(this);
         this.mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
     }
 
     @Override
