@@ -7,20 +7,25 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import android.provider.MediaStore.Images.Media;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import android.view.ViewGroup.LayoutParams;
 
 
 public class MainAppActivity extends Activity {
     private Camera mCamera;
     private CameraPreview mCameraPreview;
+    LayoutInflater controlInflater;
 
     /** Called when the activity is first created. */
     @Override
@@ -29,10 +34,18 @@ public class MainAppActivity extends Activity {
         setContentView(R.layout.activity_main_app);
         mCamera = getCameraInstance();
         mCameraPreview = new CameraPreview(this, mCamera);
+        //get frame layout
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        //Add camera to the Frame Layout
         preview.addView(mCameraPreview);
 
-        Button captureButton = (Button) findViewById(R.id.button_capture);
+
+        //ImageButton captureButton = (ImageButton) findViewById(R.id.takepicture);
+        //((ViewGroup)captureButton.getParent()).removeView(captureButton);
+        controlInflater = LayoutInflater.from(getApplicationContext());
+        View viewControl = controlInflater.inflate(R.layout.control, null);
+        ImageButton captureButton = (ImageButton) viewControl.findViewById(R.id.takepicture);
+        preview.addView(viewControl);
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
