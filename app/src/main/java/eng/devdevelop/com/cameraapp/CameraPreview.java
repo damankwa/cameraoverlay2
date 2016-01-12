@@ -14,7 +14,7 @@ import android.view.ViewGroup.LayoutParams;
 import java.io.IOException;
 
 /**
- * Created by David Amankwa on 12/30/2015.
+ * Created by David Amankwa Devdeveloper on 12/30/2015.
  */
 
 public class CameraPreview extends SurfaceView implements
