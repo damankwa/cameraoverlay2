@@ -62,9 +62,9 @@ public class CameraPreview extends SurfaceView implements
             if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE)
             {
                 parameters.set("orientation", "portrait");
-                // For Android Version 2.2 and above
+                // For Android Version 2.2 and above make preview image not show in landscape
                 mCamera.setDisplayOrientation(90);  //
-                // For Android Version 2.0 and above
+                // For Android Version 2.0 and above saves image in portrait mode
                 parameters.setRotation(90);
             }
 
@@ -75,4 +75,6 @@ public class CameraPreview extends SurfaceView implements
             t.show();
         }
     }
+
+
 }

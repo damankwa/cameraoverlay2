@@ -2,17 +2,25 @@ package eng.devdevelop.com.cameraapp;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 
 import android.provider.MediaStore.Images.Media;
+import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -25,6 +33,8 @@ import android.view.ViewGroup.LayoutParams;
 public class MainAppActivity extends Activity {
     private Camera mCamera;
     private CameraPreview mCameraPreview;
+    ImageView CapturedImage;
+    Uri imageFileUri;
     LayoutInflater controlInflater;
 
     /** Called when the activity is first created. */
@@ -51,8 +61,10 @@ public class MainAppActivity extends Activity {
             public void onClick(View v) {
 
                 mCamera.takePicture(null, null, mPicture);
+
             }
         });
+
     }
 
     /**
@@ -80,7 +92,7 @@ public class MainAppActivity extends Activity {
                 return;
             }
             */
-            Uri imageFileUri = getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, new ContentValues());
+             imageFileUri = getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, new ContentValues());
             try {
                 OutputStream ImgFileOs = getContentResolver().openOutputStream(imageFileUri);
                 ImgFileOs.write(data);
@@ -93,6 +105,11 @@ public class MainAppActivity extends Activity {
                 Toast t = Toast.makeText(getApplicationContext(),e.getMessage(), Toast.LENGTH_SHORT);
                 t.show();
             }
+
+            Intent i = new Intent(getApplicationContext(), EditPictureActivity.class);
+            i.putExtra("new_camerapic_uri",imageFileUri.toString());
+            startActivity(i);
+
         }
     };
 
@@ -116,4 +133,26 @@ public class MainAppActivity extends Activity {
 
         return mediaFile;
     }*/
+    /**
+     * Here we store the file url as it will be null after returning from camera
+     * app
+     */
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // save file url in bundle as it will be null on scren orientation
+        // changes
+        outState.putParcelable("file_uri", imageFileUri);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // get the file url
+        imageFileUri = savedInstanceState.getParcelable("file_uri");
+    }
 }

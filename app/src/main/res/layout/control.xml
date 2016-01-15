@@ -2,8 +2,8 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:weightSum="1">
 
     <RelativeLayout
@@ -22,7 +22,7 @@
     </RelativeLayout>
         <TableLayout
             android:orientation="vertical"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
@@ -46,6 +46,7 @@
                 android:layout_height="wrap_content"
                 android:text=" * Take Picture "
                 android:src="@drawable/camera_icon_selector"
+                android:alpha="0.4"
                 android:layout_gravity="center_horizontal" />
 
                 <Button
@@ -53,8 +54,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Save "
-                    android:src="@drawable/camera_icon_selector"
+
                     android:layout_gravity="center_horizontal"
+
+
                     />
             </TableRow>
         </TableLayout>
