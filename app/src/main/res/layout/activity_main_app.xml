@@ -7,9 +7,42 @@
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1" >
+        android:layout_height="match_parent">
 
+        <Button
+            android:id="@+id/topbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" Edit "
+            android:layout_gravity="center_horizontal|top" />
+
+        <ImageButton
+            android:id="@+id/takepicture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" * Take Picture "
+            android:src="@drawable/camera_icon_selector"
+            android:alpha="0.4"
+            android:layout_gravity="center_horizontal|bottom" />
+
+        <Button
+            android:id="@+id/saveTake"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save "
+
+            android:layout_gravity="right|bottom"
+
+
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/takepicture"
+            android:text="New Text"
+            android:id="@+id/textView"
+            android:layout_gravity="left|bottom" />
     </FrameLayout>
 
 

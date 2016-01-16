@@ -33,6 +33,7 @@ import android.view.ViewGroup.LayoutParams;
 public class MainAppActivity extends Activity {
     private Camera mCamera;
     private CameraPreview mCameraPreview;
+    FrameLayout preview;
     ImageView CapturedImage;
     Uri imageFileUri;
     LayoutInflater controlInflater;
@@ -46,16 +47,11 @@ public class MainAppActivity extends Activity {
         mCameraPreview = new CameraPreview(this, mCamera);
         //get frame layout
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        //Add camera to the Frame Layout
-        preview.addView(mCameraPreview);
+        //Add camera to the Frame Layout 0 makes view be the first view to display in the layout. Without index 0, the camera preview will be on top of the buttons
+        preview.addView(mCameraPreview,0);
 
+        ImageButton captureButton = (ImageButton)findViewById(R.id.takepicture);
 
-        //ImageButton captureButton = (ImageButton) findViewById(R.id.takepicture);
-        //((ViewGroup)captureButton.getParent()).removeView(captureButton);
-        controlInflater = LayoutInflater.from(getApplicationContext());
-        View viewControl = controlInflater.inflate(R.layout.control, null);
-        ImageButton captureButton = (ImageButton) viewControl.findViewById(R.id.takepicture);
-        preview.addView(viewControl);
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -64,6 +60,8 @@ public class MainAppActivity extends Activity {
 
             }
         });
+
+
 
     }
 
@@ -112,6 +110,51 @@ public class MainAppActivity extends Activity {
 
         }
     };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Creating the camera
+        if (mCamera == null) {
+            createCamera();
+        }
+
+    }
+
+    private void createCamera() {
+        // Create an instance of Camera
+        mCamera = getCameraInstance();
+
+        //this creates a new holder callback etc so make sure to release onpause
+        mCameraPreview = new CameraPreview(this, mCamera);
+
+        //get frame layout
+        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        //Add camera to the Frame Layout, make it the first child of index 0
+        preview.addView(mCameraPreview,0);
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // release the camera immediately on pause event
+        //also remove holder callback for preview
+        releaseCamera();
+
+
+    }
+
+    private void releaseCamera() {
+        if (mCamera != null) {
+
+            mCameraPreview.getHolder().removeCallback(mCameraPreview);
+            mCamera.release(); // release the camera for other applications
+            mCamera = null;
+        }
+    }
 
  /*   private static File getOutputMediaFile() {
         File mediaStorageDir = new File(

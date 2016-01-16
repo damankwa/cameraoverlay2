@@ -13,6 +13,7 @@ import android.view.Display;
 import android.widget.ImageView;
 
 import java.io.FileNotFoundException;
+import eng.devdevelop.com.cameraapp.util.BitmapUtil;
 
 public class EditPictureActivity extends Activity {
 
@@ -34,13 +35,13 @@ public class EditPictureActivity extends Activity {
                 bmpFactoryOptions.inJustDecodeBounds = true;
                 Bitmap bmp = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageFileUri), null, bmpFactoryOptions);
 
-                bmpFactoryOptions.inSampleSize = 1;
+                bmpFactoryOptions.inSampleSize = BitmapUtil.calculateInSampleSize(bmpFactoryOptions,480,480);
 
                 bmpFactoryOptions.inJustDecodeBounds = false;
                  bmp = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageFileUri), null, bmpFactoryOptions);
 
                //rotates image by 90because by default it saves image as landscape
-                Bitmap scaledBitmap = getRotatePic(bmp);
+                Bitmap scaledBitmap = BitmapUtil.getRotatedAndScaledBitmap(bmp);
 
                 displayImgView.setImageBitmap(scaledBitmap);
             } catch (FileNotFoundException e) {
@@ -48,18 +49,7 @@ public class EditPictureActivity extends Activity {
             }
         }
     }
-    public Bitmap getRotatePic(Bitmap bmp){
-        //image retrieved from bitmap is rotated
-        Matrix matrix = new Matrix();
-        matrix.postRotate(90);
 
-        int h = 320; // Height in pixels
-        int w = 480; // Width in pixels
-
-        Bitmap rotatedBitmap = Bitmap.createBitmap(bmp , 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(rotatedBitmap, h, w, true);
-        return scaledBitmap;
-    }
 
 }
 

@@ -33,9 +33,10 @@ public class CameraPreview extends SurfaceView implements
         this.mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
     }
-
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+
+
         try {
             mCamera.setPreviewDisplay(surfaceHolder);
             mCamera.startPreview();
@@ -45,19 +46,30 @@ public class CameraPreview extends SurfaceView implements
             t.show();
         }
     }
-
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        mCamera.stopPreview();
-        mCamera.release();
-    }
 
+    }
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int format,
                                int width, int height) {
+
+
+        if (mSurfaceHolder.getSurface() == null) {
+            // preview surface does not exist
+            return;
+        }
+
+        // stop preview before making changes
+        try {
+            mCamera.stopPreview();
+        } catch (Exception e) {
+            // ignore: tried to stop a non-existent preview
+        }
+
         // start preview with new settings
         try {
-            mCamera.setPreviewDisplay(surfaceHolder);
+            mCamera.setPreviewDisplay(mSurfaceHolder);
             Camera.Parameters parameters = mCamera.getParameters();
             if (this.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE)
             {
