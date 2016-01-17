@@ -1,7 +1,9 @@
 package eng.devdevelop.com.cameraapp;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +12,8 @@ import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.MediaStore.Images.Media;
 import android.util.Log;
 import android.view.Display;
@@ -23,16 +27,23 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Timestamp;
+
 import android.view.ViewGroup.LayoutParams;
+
+import eng.devdevelop.com.cameraapp.util.BitmapUtil;
 
 
 public class MainAppActivity extends Activity {
     private Camera mCamera;
     private CameraPreview mCameraPreview;
+    private int cameraId;
     FrameLayout preview;
     ImageView CapturedImage;
     Uri imageFileUri;
@@ -43,12 +54,16 @@ public class MainAppActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_app);
-        mCamera = getCameraInstance();
-        mCameraPreview = new CameraPreview(this, mCamera);
+
+        // camera surface view created
+        cameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+
+        mCamera = getCameraInstance(cameraId);
+        mCameraPreview = new CameraPreview(this, mCamera, cameraId);
         //get frame layout
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         //Add camera to the Frame Layout 0 makes view be the first view to display in the layout. Without index 0, the camera preview will be on top of the buttons
-        preview.addView(mCameraPreview,0);
+        preview.addView(mCameraPreview, 0);
 
         ImageButton captureButton = (ImageButton)findViewById(R.id.takepicture);
 
@@ -57,6 +72,16 @@ public class MainAppActivity extends Activity {
             public void onClick(View v) {
 
                 mCamera.takePicture(null, null, mPicture);
+
+            }
+        });
+
+        Button flipCamera = (Button) findViewById(R.id.saveTake);
+        flipCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+              flipCamera();
 
             }
         });
@@ -71,15 +96,40 @@ public class MainAppActivity extends Activity {
      *
      * @return
      */
-    private Camera getCameraInstance() {
+    private Camera getCameraInstance(int cameraId) {
         Camera camera = null;
         try {
-            camera = Camera.open();
+            camera = Camera.open(cameraId);
         } catch (Exception e) {
             // cannot get camera or does not exist
         }
         return camera;
     }
+
+    private void flipCamera() {
+         cameraId = (cameraId == Camera.CameraInfo.CAMERA_FACING_BACK ? Camera.CameraInfo.CAMERA_FACING_FRONT
+                : Camera.CameraInfo.CAMERA_FACING_BACK);
+        if (mCamera != null) {
+            mCameraPreview.getHolder().removeCallback(mCameraPreview);
+            //mCamera.setPreviewCallback(null);
+            mCamera.stopPreview();
+            mCamera.release();
+            mCamera = null;
+            try {
+
+               // mCamera = Camera.open(id);
+                createCamera(cameraId);
+               // mCamera.setPreviewDisplay(mCameraPreview.getHolder());
+               // mCamera.startPreview();
+            }
+            catch (final Exception e) {
+                mCamera = null;
+                e.printStackTrace();
+            }
+        }
+
+    }
+
 
     Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
@@ -90,14 +140,77 @@ public class MainAppActivity extends Activity {
                 return;
             }
             */
-             imageFileUri = getContentResolver().insert(Media.EXTERNAL_CONTENT_URI, new ContentValues());
+
+
+            File imageFile = null;
+            int rotatedeg;
+
             try {
-                OutputStream ImgFileOs = getContentResolver().openOutputStream(imageFileUri);
-                ImgFileOs.write(data);
-                ImgFileOs.close();
-            } catch (FileNotFoundException e) {
-                Toast t = Toast.makeText(getApplicationContext(),e.getMessage(), Toast.LENGTH_SHORT);
-                t.show();
+                // convert byte array into bitmap
+                Bitmap loadedImageBitmap = null;
+                Bitmap rotatedBitmap = null;
+                loadedImageBitmap = BitmapFactory.decodeByteArray(data, 0,
+                        data.length);
+
+                android.hardware.Camera.CameraInfo info =
+                        new android.hardware.Camera.CameraInfo();
+                android.hardware.Camera.getCameraInfo(cameraId, info);
+
+                if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                    rotatedeg = -90;
+                } else {  // back-facing camera
+                   rotatedeg = 90;
+                }
+
+                rotatedBitmap = BitmapUtil.getRotatedAndScaledBitmap(loadedImageBitmap,rotatedeg);
+
+                String state = Environment.getExternalStorageState();
+                File folder = null;
+                if (state.contains(Environment.MEDIA_MOUNTED)) {
+                    folder = new File(Environment
+                            .getExternalStorageDirectory() + "/DevDevelopCameraApp");
+                } else {
+                    folder = new File(Environment
+                            .getExternalStorageDirectory() + "/DevDevelopCameraApp");
+                }
+
+                boolean success = true;
+                if (!folder.exists()) {
+                    success = folder.mkdirs();
+                }
+                if (success) {
+                    java.util.Date date = new java.util.Date();
+                    imageFile = new File(folder.getAbsolutePath()
+                            + File.separator
+                            + new Timestamp(date.getTime()).toString()
+                            + "Image.jpg");
+
+                    imageFile.createNewFile();
+                } else {
+                    Toast.makeText(getBaseContext(), "Image Not saved",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+                //write the roatated image to ostream
+                rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, ostream);
+                FileOutputStream fout = new FileOutputStream(imageFile);
+                // save image into gallery
+
+                fout.write(ostream.toByteArray());
+                fout.close();
+                ContentValues values = new ContentValues();
+
+                values.put(MediaStore.Images.Media.DATE_TAKEN,
+                        System.currentTimeMillis());
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+                values.put(MediaStore.MediaColumns.DATA,
+                        Uri.fromFile(imageFile).toString());
+
+                MainAppActivity.this.getContentResolver().insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
 
             } catch (IOException e) {
                 Toast t = Toast.makeText(getApplicationContext(),e.getMessage(), Toast.LENGTH_SHORT);
@@ -105,7 +218,8 @@ public class MainAppActivity extends Activity {
             }
 
             Intent i = new Intent(getApplicationContext(), EditPictureActivity.class);
-            i.putExtra("new_camerapic_uri",imageFileUri.toString());
+            //i.putExtra("new_camerapic_uri",imageFileUri.toString());
+            i.putExtra("new_camerapic_uri",Uri.fromFile(imageFile).toString());
             startActivity(i);
 
         }
@@ -117,20 +231,23 @@ public class MainAppActivity extends Activity {
 
         // Creating the camera
         if (mCamera == null) {
-            createCamera();
+            cameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+            createCamera(cameraId);
         }
 
     }
 
-    private void createCamera() {
+    private void createCamera(int cameraId) {
         // Create an instance of Camera
-        mCamera = getCameraInstance();
+
+        mCamera = getCameraInstance(cameraId);
 
         //this creates a new holder callback etc so make sure to release onpause
-        mCameraPreview = new CameraPreview(this, mCamera);
+        mCameraPreview = new CameraPreview(this, mCamera, cameraId);
 
         //get frame layout
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+        preview.removeViewAt(0);
         //Add camera to the Frame Layout, make it the first child of index 0
         preview.addView(mCameraPreview,0);
 

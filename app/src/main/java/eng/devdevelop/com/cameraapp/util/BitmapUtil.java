@@ -8,10 +8,10 @@ import android.graphics.Matrix;
  * Created by David on 1/14/2016.
  */
 public class BitmapUtil {
-    public static Bitmap getRotatedAndScaledBitmap(Bitmap bmp){
+    public static Bitmap getRotatedAndScaledBitmap(Bitmap bmp, int rotatedegrees){
         //image retrieved from bitmap is rotated
         Matrix matrix = new Matrix();
-        matrix.postRotate(90);
+        matrix.postRotate(rotatedegrees);
 
         int h = 320; // Height in pixels
         int w = 480; // Width in pixels

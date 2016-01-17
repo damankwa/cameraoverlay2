@@ -41,9 +41,9 @@ public class EditPictureActivity extends Activity {
                  bmp = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageFileUri), null, bmpFactoryOptions);
 
                //rotates image by 90because by default it saves image as landscape
-                Bitmap scaledBitmap = BitmapUtil.getRotatedAndScaledBitmap(bmp);
+               // Bitmap scaledBitmap = BitmapUtil.getRotatedAndScaledBitmap(bmp);
 
-                displayImgView.setImageBitmap(scaledBitmap);
+                displayImgView.setImageBitmap(bmp);
             } catch (FileNotFoundException e) {
                 Log.v("ERROR", e.toString());
             }
