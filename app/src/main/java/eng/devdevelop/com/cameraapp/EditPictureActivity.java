@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Environment;
@@ -54,7 +55,18 @@ public class EditPictureActivity extends Activity {
                 bmpFactoryOptions.inJustDecodeBounds = true;
                 Bitmap bmp = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageFileUri), null, bmpFactoryOptions);
 
-                bmpFactoryOptions.inSampleSize = BitmapUtil.calculateInSampleSize(bmpFactoryOptions, 480, 480);
+                Display display = getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                int widthpx = size.x;
+                int heightpx = size.y;
+
+                DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+
+                int widthpxtodp = (int) ((widthpx/displayMetrics.density)+0.5);
+                int heightpxtodp = (int) ((heightpx/displayMetrics.density)+0.5);
+
+                bmpFactoryOptions.inSampleSize = BitmapUtil.calculateInSampleSize(bmpFactoryOptions, widthpxtodp, heightpxtodp);
 
                 bmpFactoryOptions.inJustDecodeBounds = false;
                 bmp = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageFileUri), null, bmpFactoryOptions);
@@ -112,7 +124,8 @@ public class EditPictureActivity extends Activity {
 
     public Bitmap GetCombinedImage(Bitmap background_img, Bitmap foreground_img){
 
-        int width = 480, height = 320;
+
+        //int width = 480, height = 320;
         Bitmap alternate_bmp;
 
         Matrix matrix = new Matrix();

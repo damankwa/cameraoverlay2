@@ -7,14 +7,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images.Media;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -33,6 +36,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 
 import android.view.ViewGroup.LayoutParams;
@@ -162,7 +166,55 @@ public class MainAppActivity extends Activity {
                    rotatedeg = 90;
                 }
 
-                rotatedBitmap = BitmapUtil.getRotatedAndScaledBitmap(loadedImageBitmap,rotatedeg);
+                /*
+                Display display = getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                try {
+                    display.getRealSize(size);
+                }catch (NoSuchMethodError e){
+                    display.getSize(size);
+                }
+                int widthpx = size.x;
+                int heightpx = size.y;
+                */
+
+                Display display = getWindowManager().getDefaultDisplay();
+                int realWidthpx;
+                int realHeightpx;
+
+                if (Build.VERSION.SDK_INT >= 17){
+                    //new pleasant way to get real metrics
+                    DisplayMetrics realMetrics = new DisplayMetrics();
+                    display.getRealMetrics(realMetrics);
+                    realWidthpx = realMetrics.widthPixels;
+                    realHeightpx = realMetrics.heightPixels;
+
+                } else if (Build.VERSION.SDK_INT >= 14) {
+                    //reflection for this weird in-between time
+                    try {
+                        Method mGetRawH = Display.class.getMethod("getRawHeight");
+                        Method mGetRawW = Display.class.getMethod("getRawWidth");
+                        realWidthpx = (Integer) mGetRawW.invoke(display);
+                        realHeightpx = (Integer) mGetRawH.invoke(display);
+                    } catch (Exception e) {
+                        //this may not be 100% accurate, but it's all we've got
+                        realWidthpx = display.getWidth();
+                        realHeightpx = display.getHeight();
+                        Log.e("Display Info", "Couldn't use reflection to get the real display metrics.");
+                    }
+
+                } else {
+                    //This should be close, as lower API devices should not have window navigation bars
+                    realWidthpx = display.getWidth();
+                    realHeightpx = display.getHeight();
+                }
+
+                DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+
+                int widthpxtodp = (int) ((realWidthpx/displayMetrics.density)+0.5);
+                int heightpxtodp = (int) ((realHeightpx/displayMetrics.density)+0.5);
+
+                rotatedBitmap = BitmapUtil.getRotatedAndScaledBitmap(loadedImageBitmap,rotatedeg,widthpxtodp,heightpxtodp);
 
                 String state = Environment.getExternalStorageState();
                 File folder = null;

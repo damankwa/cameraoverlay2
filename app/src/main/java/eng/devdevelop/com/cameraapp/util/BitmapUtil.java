@@ -3,22 +3,26 @@ package eng.devdevelop.com.cameraapp.util;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
+import android.view.Display;
 
 /**
  * Created by David on 1/14/2016.
  */
 public class BitmapUtil {
-    public static Bitmap getRotatedAndScaledBitmap(Bitmap bmp, int rotatedegrees){
+    public static Bitmap getRotatedAndScaledBitmap(Bitmap bmp, int rotatedegrees, int dpWidth, int dpHeight){
         //image retrieved from bitmap is rotated
         Matrix matrix = new Matrix();
         //matrix.postRotate(rotatedegrees);
         matrix.preRotate(rotatedegrees);
 
-        int h = 320; // Height in pixels
-        int w = 480; // Width in pixels
+        int h = 480; // Height in pixels actual device 1920
+        int w = 320; // Width in pixels actual device 1080
+
+
 
         Bitmap rotatedBitmap = Bitmap.createBitmap(bmp , 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true);
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(rotatedBitmap, h, w, true);
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(rotatedBitmap, dpWidth, dpHeight, true);
         return scaledBitmap;
     }
 
