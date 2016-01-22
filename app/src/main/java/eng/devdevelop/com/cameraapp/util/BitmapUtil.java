@@ -11,7 +11,8 @@ public class BitmapUtil {
     public static Bitmap getRotatedAndScaledBitmap(Bitmap bmp, int rotatedegrees){
         //image retrieved from bitmap is rotated
         Matrix matrix = new Matrix();
-        matrix.postRotate(rotatedegrees);
+        //matrix.postRotate(rotatedegrees);
+        matrix.preRotate(rotatedegrees);
 
         int h = 320; // Height in pixels
         int w = 480; // Width in pixels
