@@ -1,6 +1,7 @@
 package eng.devdevelop.com.cameraapp;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -17,6 +19,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -38,6 +41,7 @@ public class EditPictureActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_edit_picture);
 
         FrameLayout editpreview = (FrameLayout) findViewById(R.id.edit_preview);
@@ -77,7 +81,10 @@ public class EditPictureActivity extends Activity {
                 iv = new ImageView(this);
                 iv.setDrawingCacheEnabled(true);
                 iv.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
-                iv.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+                iv.setLayoutParams(layoutParams);
+                iv.setAdjustViewBounds(true);
+                iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 iv.setImageBitmap(bmp);
 
 
@@ -86,7 +93,10 @@ public class EditPictureActivity extends Activity {
                 dv = new EditPictureView(this);
                 dv.setDrawingCacheEnabled(true);
                 dv.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
-                dv.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+                FrameLayout.LayoutParams layoutParams1 = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+                dv.setLayoutParams(layoutParams1);
+                dv.setAdjustViewBounds(true);
+                dv.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
                 editpreview.addView(dv);
 
@@ -183,6 +193,17 @@ public class EditPictureActivity extends Activity {
 
             fout.write(ostream.toByteArray());
             fout.close();
+
+            ContentValues values = new ContentValues();
+
+            values.put(MediaStore.Images.Media.DATE_TAKEN,
+                    System.currentTimeMillis());
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.MediaColumns.DATA,
+                    Uri.fromFile(imageFile).toString());
+
+            EditPictureActivity.this.getContentResolver().insert(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
             Toast.makeText(getBaseContext(), "Image  saved",
                     Toast.LENGTH_SHORT).show();

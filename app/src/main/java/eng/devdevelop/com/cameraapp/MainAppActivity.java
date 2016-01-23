@@ -24,6 +24,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -57,6 +59,7 @@ public class MainAppActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main_app);
 
         // camera surface view created
@@ -252,6 +255,7 @@ public class MainAppActivity extends Activity {
 
                 fout.write(ostream.toByteArray());
                 fout.close();
+                /*
                 ContentValues values = new ContentValues();
 
                 values.put(MediaStore.Images.Media.DATE_TAKEN,
@@ -262,7 +266,7 @@ public class MainAppActivity extends Activity {
 
                 MainAppActivity.this.getContentResolver().insert(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
+                */
 
             } catch (IOException e) {
                 Toast t = Toast.makeText(getApplicationContext(),e.getMessage(), Toast.LENGTH_SHORT);
